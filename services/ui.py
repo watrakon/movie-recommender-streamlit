@@ -1,60 +1,56 @@
 import streamlit as st
-import streamlit.components.v1 as components
-import os
+import re
 
-def render_sidebar_nav() -> None:
-    try:
-        with st.sidebar:
-            st.page_link("app.py", label="🏠 Home")
-            st.page_link("pages/0_🔐_Auth.py", label="🔐 Auth")
-            st.page_link("pages/3_⭐_Recommender.py", label="⭐ Recommender")
-    except Exception:
-        pass
+def render_sidebar_nav():
+    """Custom sidebar navigation styling"""
+    st.markdown("""
+        <style>
+            [data-testid="stSidebarNav"] {
+                padding-top: 1rem;
+            }
+        </style>
+    """, unsafe_allow_html=True)
 
-def render_heartbeat(user_id: int, movie_id: int = None) -> None:
-    """
-    Injects a small JavaScript snippet that sends a 'heartbeat' activity to the backend
-    every 30 seconds to track dwell time.
-    """
-    if not user_id:
-        return
+def render_heartbeat(user_id):
+    """Placeholder for user heartbeat/activity"""
+    pass
 
-    api_base = os.getenv("API_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
-    m_id = int(movie_id) if movie_id else "null"
-    
-    # We use a unique key for the component based on the movie_id to ensure it resets when the page changes
-    component_key = f"heartbeat_{user_id}_{m_id}"
-    
-    js_code = f"""
-    <script>
-    (function() {{
-        const userId = {user_id};
-        const movieId = {m_id};
-        const apiBase = "{api_base}";
-        const interval = 30000; // 30 seconds
-        
-        console.log("Heartbeat started for user " + userId + " on movie " + movieId);
-        
-        const sendHeartbeat = () => {{
-            fetch(`${{apiBase}}/users/${{userId}}/activities`, {{
-                method: 'POST',
-                headers: {{ 'Content-Type': 'application/json' }},
-                body: JSON.stringify({{
-                    activity_type: 'heartbeat',
-                    movie_id: movieId,
-                    details: 'staying_on_page'
-                }})
-            }}).catch(err => console.error("Heartbeat failed", err));
-        }};
+def apply_fx_theme():
+    """Apply the Cyber-Cosmic theme globally"""
+    st.markdown("""
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap');
+      html, body, [class*="css"] { font-family: 'Inter', 'Prompt', sans-serif !important; }
+      :root {
+        --fx-bg-1: #060b14;
+        --fx-bg-2: #051410;
+        --fx-accent: rgba(34, 197, 94, 0.85);
+      }
+      .stApp {
+        background: radial-gradient(1200px 800px at 12% 18%, rgba(34, 197, 94, 0.18), transparent 65%),
+                    linear-gradient(135deg, var(--fx-bg-1), var(--fx-bg-2));
+      }
+    </style>
+    """, unsafe_allow_html=True)
 
-        // Send initial heartbeat
-        sendHeartbeat();
-        
-        // Setup interval
-        setInterval(sendHeartbeat, interval);
-    }})();
-    </script>
-    """
-    
-    # Render the JS in a hidden 0x0 iframe
-    components.html(js_code, height=0, width=0)
+def _get_lang():
+    """Get current language from session state"""
+    return st.session_state.get("language", "th")
+
+def _poster_url(movie):
+    """Get poster URL with fallback"""
+    poster = movie.get("posterUrl") or movie.get("poster_url")
+    if not poster or str(poster).lower() == "nan":
+        return "https://via.placeholder.com/500x750?text=No+Poster"
+    return poster
+
+def _localize_genres(genres_str):
+    """Translate genres to Thai if needed"""
+    if not genres_str: return ""
+    translations = {
+        "Action": "แอคชั่น", "Comedy": "ตลก", "Drama": "ดราม่า",
+        "Sci-Fi": "ไซไฟ", "Horror": "สยองขวัญ", "Romance": "โรแมนติก"
+    }
+    for eng, th in translations.items():
+        genres_str = genres_str.replace(eng, th)
+    return genres_str

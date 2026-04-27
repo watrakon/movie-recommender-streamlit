@@ -3,7 +3,8 @@ import streamlit as st
 import os
 
 from services.auth import authenticate, create_user, get_username
-from app import _get_lang, apply_fx_theme, clear_auth_in_cookie, clear_auth_in_url, restore_auth, set_auth_in_cookie, set_auth_in_url
+from services.ui import _get_lang, apply_fx_theme
+from services.auth import clear_auth_in_cookie, clear_auth_in_url, restore_auth, set_auth_in_cookie, set_auth_in_url
 
 
 from services.ui import render_sidebar_nav
