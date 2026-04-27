@@ -1,0 +1,10 @@
+streamlit
+pandas
+numpy
+scikit-learn
+requests
+fastapi
+uvicorn[standard]
+sqlalchemy
+streamlit-cookies-manager
+google-auth

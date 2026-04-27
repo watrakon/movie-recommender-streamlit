@@ -1,0 +1,124 @@
+import streamlit as st
+
+from services.data_loader import load_movie_data, load_ratings_data
+from services.api_client import ApiError, recommend_hybrid as api_recommend_hybrid, log_activity
+from app import _get_lang, _t, _render_movie_card, apply_fx_theme, restore_auth
+
+
+from services.ui import render_sidebar_nav
+
+
+st.set_page_config(page_title="Recommender", page_icon="⭐", layout="wide")
+
+
+def main():
+    render_sidebar_nav()
+    # กู้สถานะล็อกอินจาก URL/Cookie (ถ้ามี) เพื่อให้ข้ามหน้าแล้วยังรู้ว่าเป็นผู้ใช้คนไหน
+    restore_auth()
+    # ใส่ธีม/เอฟเฟกต์ของทั้งเว็บ (พื้นหลัง/สี) ให้เหมือนกันทุกหน้า
+    apply_fx_theme()
+    # อ่านภาษาที่ผู้ใช้เลือก (th/en)
+    lang = _get_lang()
+    st.title("⭐ Movie Recommender" if lang == "en" else "⭐ ระบบแนะนำภาพยนตร์")
+    st.caption(
+        "Pick a movie you like or use your ratings to get personalized suggestions."
+        if lang == "en"
+        else "เลือกภาพยนตร์ที่คุณชอบ หรือใช้พฤติกรรมการให้คะแนนเพื่อรับคำแนะนำเฉพาะคุณ"
+    )
+
+    # โหลดข้อมูลหนัง/เรทติ้งจากฝั่ง service (โดยปกติจะดึงจาก backend แล้วแปลงเป็น DataFrame)
+    df_movies = load_movie_data()
+    df_ratings = load_ratings_data()
+    # ถ้าไม่มีข้อมูลหนัง จะไม่สามารถแนะนำอะไรได้
+    if df_movies.empty:
+        msg = _t("no_movies") if hasattr(__import__("app"), "_t") else "No movie data."
+        st.warning(msg)
+        return
+
+    # ดึงข้อมูลผู้ใช้ที่ล็อกอินอยู่จาก session_state
+    current = st.session_state.get("current_user_id")
+    current_name = st.session_state.get("current_username")
+
+    # หน้าแนะนำนี้ออกแบบให้ “แนะนำสำหรับผู้ใช้ที่ล็อกอิน” เท่านั้น
+    if not current:
+        st.info(
+            "กรุณาเข้าสู่ระบบก่อน เพื่อให้ระบบแนะนำจากคะแนนของคุณ"
+            if lang == "th"
+            else "Please log in first to get personalized recommendations."
+        )
+        return
+
+    # user_id คือ id ที่จะส่งไป backend เพื่อคำนวณคำแนะนำ
+    user_id = int(current)
+    # นับจำนวนเรทติ้งของผู้ใช้นี้ เพื่อบอกผู้ใช้ว่ามีข้อมูลมากน้อยแค่ไหน (ข้อมูลมาก -> แนะนำแม่นขึ้น)
+    rating_count = 0
+    try:
+        rating_count = int((df_ratings["userId"] == int(user_id)).sum())
+    except Exception:
+        rating_count = 0
+
+    # แสดงชื่อผู้ใช้ (ถ้ามี) เพื่อยืนยันว่าแนะนำสำหรับบัญชีนี้จริง
+    label_name = current_name or f"User #{user_id}"
+    st.caption(
+        f"กำลังแนะนำสำหรับ: {label_name} (ให้คะแนนแล้ว {rating_count} รายการ)"
+        if lang == "th"
+        else f"Recommendations for: {label_name} ({rating_count} ratings)"
+    )
+
+    # ให้ผู้ใช้เลือกว่าอยากได้ผลลัพธ์กี่รายการ
+    n_recs = st.slider(_t("recs_count"), 5, 20, 10)
+
+    st.markdown("---")
+
+    # signature ใช้กันการเรียก API ซ้ำทุกครั้งที่ Streamlit rerun
+    # จะเรียกใหม่ก็ต่อเมื่อ user_id หรือจำนวนคำแนะนำเปลี่ยน
+    signature = f"hybrid|{int(n_recs)}|{int(user_id)}"
+    if st.session_state.get("recs_signature") != signature:
+        st.session_state["recs_signature"] = signature
+        try:
+            # เรียก backend เพื่อขอคำแนะนำแบบผสม (Hybrid)
+            rec_movies = api_recommend_hybrid(int(user_id), top_k=int(n_recs))
+            # Log recommendation view
+            try:
+                log_activity(int(user_id), "view_recommendations", details=f"count:{n_recs},type:hybrid")
+            except Exception:
+                pass
+        except ApiError:
+            rec_movies = []
+        st.session_state["recs_items"] = rec_movies
+
+    # ดึงผลที่ cache ไว้มาแสดง (ถ้าไม่มีจะเป็น list ว่าง)
+    rec_movies = st.session_state.get("recs_items") or []
+    header = (
+        f"คำแนะนำแบบผสม (Hybrid) สำหรับคุณ" if lang == "th" else "Hybrid recommendations for you"
+    )
+
+    if not rec_movies:
+        st.info(_t("recs_not_ready"))
+        return
+
+    st.subheader(header)
+    # แสดงผลลัพธ์เป็นการ์ด 4 ใบต่อแถว
+    cols_per_row = 4
+    for i in range(0, len(rec_movies), cols_per_row):
+        row = rec_movies[i : i + cols_per_row]
+        cols = st.columns(cols_per_row)
+        for col, movie in zip(cols, row):
+            with col:
+                # แปลงรูปแบบข้อมูลจาก backend (dict) ให้เป็น format ที่ _render_movie_card ใช้
+                _render_movie_card(
+                    {
+                        "movieId": movie.get("id"),
+                        "title": movie.get("title", ""),
+                        "genres": movie.get("genres", "") or "",
+                        "description": movie.get("description", "") or "",
+                        "posterUrl": movie.get("poster_url", "") or "",
+                        "title_th": "",
+                        "description_th": "",
+                    }
+                )
+
+
+if __name__ == "__main__":
+    main()
+
