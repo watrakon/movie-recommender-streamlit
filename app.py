@@ -15,8 +15,8 @@ from models.recommender import get_recommendations
 
 
 st.set_page_config(
-    page_title="Movie Recommender",
-    page_icon="🎬",
+    page_title="Home - Movie Recommender",
+    page_icon="🏠",
     layout="wide",
 )
 
