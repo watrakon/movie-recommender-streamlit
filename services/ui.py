@@ -15,7 +15,7 @@ def render_sidebar_nav():
         </style>
     """, unsafe_allow_html=True)
 
-def render_heartbeat(user_id):
+def render_heartbeat(user_id, movie_id=None, **kwargs):
     """Placeholder for user heartbeat/activity"""
     pass
 
