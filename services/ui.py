@@ -8,6 +8,10 @@ def render_sidebar_nav():
             [data-testid="stSidebarNav"] {
                 padding-top: 1rem;
             }
+            [data-testid="stSidebarNav"] li:has(a[href*="Movie_Detail"]),
+            [data-testid="stSidebarNav"] div:has(a[href*="Movie_Detail"]) {
+                display: none !important;
+            }
         </style>
     """, unsafe_allow_html=True)
 
