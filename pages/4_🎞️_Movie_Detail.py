@@ -8,7 +8,7 @@ from services.api_client import list_user_ratings as api_list_user_ratings
 from services.api_client import rate_movie as api_rate_movie
 from services.api_client import recommend_hybrid as api_recommend_hybrid
 from services.api_client import log_activity
-from services.tmdb_client import fetch_movie_details_by_id_from_tmdb, fetch_movie_details_from_tmdb
+from services.tmdb_client import fetch_movie_details_by_id_from_tmdb, fetch_movie_details_from_tmdb, fetch_movie_trailer_from_tmdb
 
 
 from services.ui import render_sidebar_nav
@@ -164,6 +164,13 @@ def main():
     </div>
     """
     st.markdown(hero_html, unsafe_allow_html=True)
+
+    # ดึงและแสดงตัวอย่างภาพยนตร์
+    trailer_url = fetch_movie_trailer_from_tmdb(title) if title else None
+    if trailer_url:
+        st.markdown(f"### {'🎬 ตัวอย่างภาพยนตร์' if lang == 'th' else '🎬 Trailer'}")
+        st.video(trailer_url)
+        st.markdown("---")
 
     # ส่วนให้คะแนน: มีเฉพาะตอนผู้ใช้ล็อกอิน
     current_user = st.session_state.get("current_user_id")

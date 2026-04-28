@@ -14,6 +14,7 @@ TMDB_SEARCH_URL = "https://api.themoviedb.org/3/search/movie"
 TMDB_MOVIE_URL = "https://api.themoviedb.org/3/movie/{movie_id}"
 TMDB_MOVIE_CREDITS_URL = "https://api.themoviedb.org/3/movie/{movie_id}/credits"
 TMDB_MOVIE_LIST_URL = "https://api.themoviedb.org/3/movie/{source}"
+TMDB_VIDEO_URL = "https://api.themoviedb.org/3/movie/{movie_id}/videos"
 TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500"
 
 
@@ -70,6 +71,38 @@ def fetch_poster_url_from_tmdb(title: str, api_key: Optional[str] = None) -> Opt
         return None
 
     return f"{TMDB_IMAGE_BASE}{poster_path}"
+
+def fetch_movie_trailer_from_tmdb(title: str, api_key: Optional[str] = None) -> Optional[str]:
+    """เรียก TMDB เพื่อหาตัวอย่างหนัง (YouTube) ถ้ามีจะคืน URL"""
+    key = api_key or TMDB_API_KEY
+    if not key: return None
+    headers, params = _build_auth(key)
+    
+    # 1. ค้นหา TMDB movie_id จากชื่อเรื่อง
+    search_params = params.copy()
+    search_params.update({"query": title, "include_adult": "false"})
+    try:
+        resp = requests.get(TMDB_SEARCH_URL, params=search_params, headers=headers, timeout=8)
+        resp.raise_for_status()
+        results = resp.json().get("results") or []
+        if not results: return None
+        tmdb_movie_id = results[0].get("id")
+    except Exception as exc:
+        logger.error("Failed to call TMDB API for %s: %s", title, exc)
+        return None
+
+    # 2. ดึงวิดีโอของภาพยนตร์
+    try:
+        url = TMDB_VIDEO_URL.format(movie_id=tmdb_movie_id)
+        resp = requests.get(url, params=params, headers=headers, timeout=8)
+        resp.raise_for_status()
+        videos = resp.json().get("results") or []
+        for video in videos:
+            if video.get("site") == "YouTube" and video.get("type") in ["Trailer", "Teaser"]:
+                return f"https://www.youtube.com/watch?v={video.get('key')}"
+    except Exception as exc:
+        logger.error("Failed to fetch trailer for tmdb_id %s: %s", tmdb_movie_id, exc)
+    return None
 
 
 def _extract_title_year(raw_title: str) -> Tuple[str, Optional[int]]:
