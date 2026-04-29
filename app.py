@@ -23,12 +23,6 @@ st.set_page_config(
 
 from services.ui import render_sidebar_nav, render_heartbeat
 
-render_sidebar_nav()
-
-user_id = st.session_state.get("current_user_id")
-if user_id:
-    render_heartbeat(user_id)
-
 st.markdown(
     """
 <style>
@@ -853,10 +847,19 @@ def _render_movie_card(movie, show_recommend_button: bool = False):
     desc_trunc = desc_source[:160] + ("..." if len(desc_source) > 160 else "") if desc_source else ("ไม่มีคำอธิบาย" if lang == "th" else "No description")
 
     href = ""
+    # แนบ auth token ใน URL เพื่อให้หน้าปลายทาง restore session ได้ (ป้องกันออกจากระบบเมื่อเปลี่ยนหน้า)
+    current_uid = st.session_state.get("current_user_id")
+    auth_token = ""
+    if current_uid:
+        try:
+            auth_token = f"&auth={int(current_uid)}.{_sign_user_id(int(current_uid))}"
+        except Exception:
+            auth_token = ""
+
     if movie_id_str:
-        href = f"?open_movie_id={movie_id_str}"
+        href = f"?open_movie_id={movie_id_str}{auth_token}"
     elif tmdb_id_str:
-        href = f"?open_tmdb_id={tmdb_id_str}"
+        href = f"?open_tmdb_id={tmdb_id_str}{auth_token}"
         
     card_html = f"""
     <a href="{href}" target="_self" style="text-decoration: none; color: inherit; display: block; height: 100%;">
@@ -881,6 +884,12 @@ def _render_movie_card(movie, show_recommend_button: bool = False):
 
 
 def main():
+    render_sidebar_nav()
+    
+    user_id = st.session_state.get("current_user_id")
+    if user_id:
+        render_heartbeat(user_id)
+        
     restore_auth()
     apply_fx_theme()
     # Handle click-through from poster links
@@ -977,14 +986,6 @@ def main():
                 else "Please go to 🔐 Auth page to login first."
             )
 
-    # ถ้ายังไม่ล็อกอิน ไม่ให้เข้าหน้าหลัก
-    if "current_user_id" not in st.session_state:
-        st.markdown(
-            "### โปรดเข้าสู่ระบบก่อน\nไปที่เมนูด้านซ้ายและเลือกหน้า `🔐 Auth` เพื่อเข้าสู่ระบบ ก่อนใช้งานระบบแนะนำภาพยนตร์"
-            if _get_lang() == "th"
-            else "### Please log in first\nUse the `🔐 Auth` page from the left menu to log in before using the movie recommender."
-        )
-        return
 
     st.markdown(f"<h1 style='margin-bottom:0'>{_t('title')}</h1>", unsafe_allow_html=True)
     st.markdown(
