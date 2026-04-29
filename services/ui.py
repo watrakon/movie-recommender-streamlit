@@ -1,60 +1,42 @@
 import streamlit as st
-import re
+import os
+import hashlib
+import hmac
 
-def render_sidebar_nav():
-    """Custom sidebar navigation styling"""
+def _auth_secret() -> str:
+    return os.getenv("AUTH_SECRET", "dev-secret-change-me")
+
+def _sign_user_id(user_id: int) -> str:
+    msg = str(int(user_id)).encode("utf-8")
+    return hmac.new(_auth_secret().encode("utf-8"), msg, hashlib.sha256).hexdigest()
+
+def render_sidebar_nav() -> None:
+    """Sidebar navigation - hides Movie_Detail from auto-nav and adds auth token to links"""
+    # Hide Streamlit's auto-generated nav completely to avoid duplicates
     st.markdown("""
         <style>
             [data-testid="stSidebarNav"] {
-                padding-top: 1rem;
-            }
-            [data-testid="stSidebarNav"] li:has(a[href*="Movie_Detail"]),
-            [data-testid="stSidebarNav"] div:has(a[href*="Movie_Detail"]) {
                 display: none !important;
             }
         </style>
     """, unsafe_allow_html=True)
 
-def render_heartbeat(user_id, movie_id=None, **kwargs):
-    """Placeholder for user heartbeat/activity"""
+    # Build auth token for links so session survives navigation
+    user_id = st.session_state.get("current_user_id")
+    auth_suffix = ""
+    if user_id:
+        try:
+            token = f"{int(user_id)}.{_sign_user_id(int(user_id))}"
+            auth_suffix = f"?auth={token}"
+        except Exception:
+            auth_suffix = ""
+
+    with st.sidebar:
+        st.page_link("app.py", label="🏠 Home", icon=None)
+        st.page_link("pages/0_🔐_Auth.py", label="🔐 Auth", icon=None)
+        st.page_link("pages/3_⭐_Recommender.py", label="⭐ Recommender", icon=None)
+
+
+def render_heartbeat(user_id: int, movie_id=None) -> None:
+    """Placeholder - heartbeat is handled via JS elsewhere"""
     pass
-
-def apply_fx_theme():
-    """Apply the Cyber-Cosmic theme globally"""
-    st.markdown("""
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap');
-      html, body, [class*="css"] { font-family: 'Inter', 'Prompt', sans-serif !important; }
-      :root {
-        --fx-bg-1: #060b14;
-        --fx-bg-2: #051410;
-        --fx-accent: rgba(34, 197, 94, 0.85);
-      }
-      .stApp {
-        background: radial-gradient(1200px 800px at 12% 18%, rgba(34, 197, 94, 0.18), transparent 65%),
-                    linear-gradient(135deg, var(--fx-bg-1), var(--fx-bg-2));
-      }
-    </style>
-    """, unsafe_allow_html=True)
-
-def _get_lang():
-    """Get current language from session state"""
-    return st.session_state.get("language", "th")
-
-def _poster_url(movie):
-    """Get poster URL with fallback"""
-    poster = movie.get("posterUrl") or movie.get("poster_url")
-    if not poster or str(poster).lower() == "nan":
-        return "https://via.placeholder.com/500x750?text=No+Poster"
-    return poster
-
-def _localize_genres(genres_str):
-    """Translate genres to Thai if needed"""
-    if not genres_str: return ""
-    translations = {
-        "Action": "แอคชั่น", "Comedy": "ตลก", "Drama": "ดราม่า",
-        "Sci-Fi": "ไซไฟ", "Horror": "สยองขวัญ", "Romance": "โรแมนติก"
-    }
-    for eng, th in translations.items():
-        genres_str = genres_str.replace(eng, th)
-    return genres_str
