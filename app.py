@@ -33,17 +33,18 @@ st.markdown(
   }
 
   :root {
-    --fx-bg-1: #060b14;
-    --fx-bg-2: #051410;
-    --fx-bg-3: #110820;
-    --fx-accent: rgba(34, 197, 94, 0.85);
-    --fx-accent-soft: rgba(34, 197, 94, 0.25);
+    --fx-bg-1: #ffffff;
+    --fx-bg-2: #fff0f5;
+    --fx-bg-3: #ffe4e1;
+    --fx-accent: rgba(255, 105, 180, 0.85);
+    --fx-accent-soft: rgba(255, 182, 193, 0.4);
   }
   .stApp {
-    background: radial-gradient(1200px 800px at 12% 18%, rgba(34, 197, 94, 0.18), transparent 65%),
-                radial-gradient(900px 600px at 86% 20%, rgba(168, 85, 247, 0.18), transparent 60%),
-                radial-gradient(900px 700px at 40% 88%, rgba(59, 130, 246, 0.15), transparent 65%),
+    background: radial-gradient(1200px 800px at 12% 18%, rgba(255, 182, 193, 0.3), transparent 65%),
+                radial-gradient(900px 600px at 86% 20%, rgba(255, 105, 180, 0.2), transparent 60%),
+                radial-gradient(900px 700px at 40% 88%, rgba(255, 192, 203, 0.3), transparent 65%),
                 linear-gradient(135deg, var(--fx-bg-1), var(--fx-bg-2));
+    color: #5A3B5D !important;
   }
   .stApp::before {
     content: "";
@@ -53,10 +54,10 @@ st.markdown(
     pointer-events: none;
     background: linear-gradient(
       120deg,
-      rgba(34, 197, 94, 0.15),
-      rgba(59, 130, 246, 0.15),
-      rgba(168, 85, 247, 0.15),
-      rgba(34, 197, 94, 0.15)
+      rgba(255, 182, 193, 0.4),
+      rgba(255, 105, 180, 0.3),
+      rgba(255, 255, 255, 0.6),
+      rgba(255, 182, 193, 0.4)
     );
     filter: blur(28px);
     opacity: 0.45;
@@ -86,20 +87,20 @@ st.markdown(
     margin: 2px 0;
   }
   [data-testid="stSidebarNav"] a:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 105, 180, 0.1);
   }
   [data-testid="stSidebarNav"] a[aria-current="page"] {
-    background: rgba(34, 197, 94, 0.18);
-    border: 1px solid rgba(34, 197, 94, 0.30);
+    background: rgba(255, 182, 193, 0.4);
+    border: 1px solid rgba(255, 105, 180, 0.5);
+    color: #FF69B4 !important;
+    font-weight: bold;
   }
 
   div.stButton > button {
     border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.14);
-    background:
-      radial-gradient(500px 200px at 20% 15%, rgba(255,255,255,0.12), transparent 55%),
-      linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
-    color: rgba(255,255,255,0.92);
+    border: 1px solid rgba(255, 105, 180, 0.3);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 240, 245, 0.8));
+    color: #FF69B4;
     font-weight: 600;
     letter-spacing: 0.2px;
     transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
@@ -109,11 +110,9 @@ st.markdown(
   }
   div.stButton > button:hover {
     transform: translateY(-1px);
-    border-color: rgba(34, 197, 94, 0.35);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.34);
-    background:
-      radial-gradient(500px 200px at 20% 15%, rgba(255,255,255,0.14), transparent 55%),
-      linear-gradient(180deg, rgba(34,197,94,0.16), rgba(255,255,255,0.06));
+    border-color: rgba(255, 105, 180, 0.8);
+    box-shadow: 0 8px 20px rgba(255, 105, 180, 0.25);
+    background: linear-gradient(180deg, rgba(255, 182, 193, 0.5), rgba(255, 255, 255, 0.9));
   }
   div.stButton > button:active {
     transform: translateY(0px) scale(0.99);
@@ -121,20 +120,19 @@ st.markdown(
   div.stButton > button:focus-visible {
     outline: none;
     box-shadow:
-      0 0 0 3px rgba(34, 197, 94, 0.22),
-      0 12px 30px rgba(0,0,0,0.34);
+      0 0 0 3px rgba(255, 105, 180, 0.4),
+      0 12px 30px rgba(255, 105, 180, 0.2);
   }
   div.stButton > button:disabled {
     opacity: 0.55;
     transform: none;
     box-shadow: none;
-    border-color: rgba(255,255,255,0.10);
+    border-color: rgba(255, 182, 193, 0.4);
   }
 
   div.stButton > button[kind="secondary"] {
-    background:
-      radial-gradient(500px 200px at 20% 15%, rgba(255,255,255,0.10), transparent 55%),
-      linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 228, 225, 0.5));
+    color: #5A3B5D;
   }
 
   div.stButton:has(button[data-testid="baseButton-secondary"][aria-label="movies_prev"]) > button,
@@ -240,15 +238,15 @@ st.markdown(
     width: 170px;
     scroll-snap-align: start;
     border-radius: 16px;
-    border: 1px solid rgba(255,255,255,0.10);
-    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255, 105, 180, 0.2);
+    background: rgba(255, 255, 255, 0.8);
     overflow: hidden;
     transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
   }
   .fx-scroll-card:hover {
     transform: translateY(-3px) scale(1.02);
-    border-color: rgba(34,197,94,0.28);
-    box-shadow: 0 12px 26px rgba(0,0,0,0.32);
+    border-color: rgba(255, 105, 180, 0.6);
+    box-shadow: 0 12px 26px rgba(255, 105, 180, 0.25);
   }
   .fx-scroll-card img {
     display: block;
@@ -261,7 +259,7 @@ st.markdown(
     font-weight: 700;
     font-size: 0.90rem;
     line-height: 1.25;
-    color: rgba(255,255,255,0.92);
+    color: #FF69B4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -291,8 +289,8 @@ st.markdown(
   }
   section.main div[data-testid="stVerticalBlockBorderWrapper"] > div {
     position: relative;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 105, 180, 0.2);
     border-radius: 16px;
     transition: box-shadow 160ms ease, border-color 160ms ease;
   }
@@ -300,10 +298,10 @@ st.markdown(
     transform: translateY(-3px) scale(1.01) !important;
   }
   section.main div[data-testid="stVerticalBlockBorderWrapper"]:hover > div {
-    border-color: rgba(34, 197, 94, 0.28);
+    border-color: rgba(255, 105, 180, 0.6);
     box-shadow:
-      0 10px 28px rgba(0, 0, 0, 0.35),
-      0 0 0 1px rgba(34, 197, 94, 0.14);
+      0 10px 28px rgba(255, 105, 180, 0.2),
+      0 0 0 1px rgba(255, 105, 180, 0.3);
   }
   section.main div[data-testid="stVerticalBlockBorderWrapper"]::after {
     content: "";
@@ -312,7 +310,7 @@ st.markdown(
     border-radius: 16px;
     pointer-events: none;
     opacity: 0;
-    background: radial-gradient(600px 240px at 20% 15%, rgba(255,255,255,0.14), transparent 60%);
+    background: radial-gradient(600px 240px at 20% 15%, rgba(255, 182, 193, 0.3), transparent 60%);
     transition: opacity 180ms ease;
   }
   section.main div[data-testid="stVerticalBlockBorderWrapper"]:hover::after {
@@ -322,14 +320,14 @@ st.markdown(
   /* Modern Input Fields */
   div[data-baseweb="input"] {
     border-radius: 12px !important;
-    background-color: rgba(255, 255, 255, 0.04) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid rgba(255, 105, 180, 0.3) !important;
     transition: all 150ms ease !important;
   }
   div[data-baseweb="input"]:focus-within {
-    border-color: rgba(34, 197, 94, 0.5) !important;
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.2) !important;
-    background-color: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 105, 180, 0.8) !important;
+    box-shadow: 0 0 12px rgba(255, 105, 180, 0.3) !important;
+    background-color: #ffffff !important;
   }
   div[data-baseweb="input"] > div {
     background-color: transparent !important;
@@ -349,11 +347,13 @@ st.markdown(
     transition: all 150ms ease !important;
   }
   button[data-baseweb="tab"]:hover {
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: rgba(255, 105, 180, 0.1) !important;
   }
   button[data-baseweb="tab"][aria-selected="true"] {
-    background: rgba(34, 197, 94, 0.15) !important;
-    border-color: rgba(34, 197, 94, 0.3) !important;
+    background: rgba(255, 182, 193, 0.3) !important;
+    border-color: rgba(255, 105, 180, 0.5) !important;
+    color: #FF69B4 !important;
+    font-weight: bold;
   }
   div[data-baseweb="tab-highlight"] {
     display: none !important;
@@ -365,20 +365,20 @@ st.markdown(
     align-items: center;
     justify-content: center;
     gap: 10px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 105, 180, 0.3);
     border-radius: 12px;
     padding: 12px;
     text-decoration: none;
-    color: white;
+    color: #5A3B5D;
     font-weight: 600;
     transition: all 150ms ease;
   }
   a.google-login-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: #ffffff;
+    border-color: rgba(255, 105, 180, 0.8);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.2);
   }
   a.google-login-btn img {
     width: 20px;
@@ -387,8 +387,8 @@ st.markdown(
 
   /* Glassmorphism Movie Cards */
   .fx-glass-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 105, 180, 0.2);
     border-radius: 16px;
     overflow: hidden;
     transition: all 250ms ease;
@@ -398,8 +398,8 @@ st.markdown(
   }
   .fx-glass-card:hover {
     transform: translateY(-5px);
-    border-color: rgba(34, 197, 94, 0.4);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.4), 0 0 20px rgba(34, 197, 94, 0.15);
+    border-color: rgba(255, 105, 180, 0.6);
+    box-shadow: 0 15px 35px rgba(255, 182, 193, 0.4), 0 0 20px rgba(255, 105, 180, 0.2);
   }
   .fx-glass-poster {
     width: 100%;
@@ -425,7 +425,7 @@ st.markdown(
   .fx-glass-title {
     font-size: 1.1rem;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.95);
+    color: #FF69B4;
     line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -434,14 +434,14 @@ st.markdown(
   }
   .fx-glass-genres {
     font-size: 0.8rem;
-    color: rgba(34, 197, 94, 0.9);
+    color: rgba(255, 105, 180, 0.9);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
   .fx-glass-desc {
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: #5A3B5D;
     line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 3;
