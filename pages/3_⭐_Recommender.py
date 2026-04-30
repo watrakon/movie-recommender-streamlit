@@ -50,12 +50,18 @@ def main():
 
     # user_id คือ id ที่จะส่งไป backend เพื่อคำนวณคำแนะนำ
     user_id = int(current)
-    # นับจำนวนเรทติ้งของผู้ใช้นี้ เพื่อบอกผู้ใช้ว่ามีข้อมูลมากน้อยแค่ไหน (ข้อมูลมาก -> แนะนำแม่นขึ้น)
+    # นับจำนวนเรทติ้งของผู้ใช้นี้จาก backend โดยตรง (แม่นยำกว่าอ่านจาก DataFrame ที่อาจ cache เก่า)
     rating_count = 0
     try:
-        rating_count = int((df_ratings["userId"] == int(user_id)).sum())
+        from services.api_client import list_user_ratings as api_list_user_ratings
+        my_ratings = api_list_user_ratings(user_id)
+        rating_count = len(my_ratings) if isinstance(my_ratings, list) else 0
     except Exception:
-        rating_count = 0
+        # fallback: นับจาก DataFrame ถ้า API ล้มเหลว
+        try:
+            rating_count = int((df_ratings["userId"] == int(user_id)).sum())
+        except Exception:
+            rating_count = 0
 
     # แสดงชื่อผู้ใช้ (ถ้ามี) เพื่อยืนยันว่าแนะนำสำหรับบัญชีนี้จริง
     label_name = current_name or f"User #{user_id}"
@@ -105,18 +111,33 @@ def main():
         cols = st.columns(cols_per_row)
         for col, movie in zip(cols, row):
             with col:
-                # แปลงรูปแบบข้อมูลจาก backend (dict) ให้เป็น format ที่ _render_movie_card ใช้
-                _render_movie_card(
-                    {
-                        "movieId": movie.get("id"),
-                        "title": movie.get("title", ""),
-                        "genres": movie.get("genres", "") or "",
-                        "description": movie.get("description", "") or "",
-                        "posterUrl": movie.get("poster_url", "") or "",
-                        "title_th": "",
-                        "description_th": "",
-                    }
-                )
+                m_id = movie.get("id")
+                m_title = movie.get("title", "")
+                m_title_th = movie.get("title_th", "") or ""
+                m_poster = movie.get("poster_url", "") or ""
+                m_genres = movie.get("genres", "") or ""
+                m_desc = movie.get("description", "") or ""
+                
+                display_title = m_title_th if lang == "th" and m_title_th else m_title
+                
+                # แสดงโปสเตอร์
+                if m_poster:
+                    st.image(m_poster, use_container_width=True)
+                else:
+                    st.markdown(f"**{display_title}**")
+                
+                st.caption(display_title)
+                
+                # ปุ่มกดเข้าดูรายละเอียด
+                btn_label = "ดูรายละเอียด" if lang == "th" else "View Details"
+                if st.button(btn_label, key=f"rec_detail_{m_id}_{i}"):
+                    st.session_state["selected_movie_id"] = m_id
+                    st.session_state.pop("selected_tmdb_id", None)
+                    try:
+                        log_activity(user_id, "click_recommendation", movie_id=m_id, details="from:recommender_page")
+                    except Exception:
+                        pass
+                    st.switch_page("pages/4_🎞️_Movie_Detail.py")
 
 
 if __name__ == "__main__":

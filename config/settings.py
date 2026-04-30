@@ -1,8 +1,10 @@
 from pathlib import Path
 import os
 from typing import Optional
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parents[1]
+load_dotenv(BASE_DIR / ".env")
 DATA_DIR = BASE_DIR / "data"
 
 # ตั้งค่า TMDB API key จาก environment variable (ถ้าไม่ตั้งจะใช้ฟีเจอร์ปก TMDB ไม่ได้)

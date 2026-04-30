@@ -291,7 +291,7 @@ def list_movie_ratings(movie_id: int, skip: int = 0, limit: int = 200, database:
 
     rows = (
         database.query(models.Rating, models.User)
-        .join(models.User, models.User.id == models.Rating.user_id)
+        .outerjoin(models.User, models.User.id == models.Rating.user_id)
         .filter(models.Rating.movie_id == int(movie_id))
         .order_by(models.Rating.created_at.desc())
         .offset(int(skip))
@@ -301,8 +301,8 @@ def list_movie_ratings(movie_id: int, skip: int = 0, limit: int = 200, database:
 
     return [
         schemas.RatingWithUser(
-            user_id=user.id,
-            username=user.username,
+            user_id=rating.user_id,
+            username=user.username if user else f"User {rating.user_id}",
             movie_id=rating.movie_id,
             rating=rating.rating,
             created_at=rating.created_at,

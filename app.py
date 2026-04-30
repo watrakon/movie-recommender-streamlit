@@ -64,8 +64,28 @@ st.markdown(
     transform: translate3d(0,0,0);
     animation: fxGlow 20s ease-in-out infinite;
   }
+  .stApp::after {
+    content: "";
+    position: fixed;
+    bottom: -10px;
+    right: 20px;
+    width: 200px;
+    height: 200px;
+    background-image: url('https://media.tenor.com/E0n_pE-y6a8AAAAj/sanrio-hello-kitty.gif');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: bottom right;
+    z-index: 1000;
+    pointer-events: none;
+    animation: floatKitty 4s ease-in-out infinite;
+  }
+  @keyframes floatKitty {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-12px) rotate(2deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .stApp::before { animation: none !important; }
+    .stApp::before, .stApp::after { animation: none !important; }
     section.main div[data-testid="stVerticalBlockBorderWrapper"] { transition: none !important; }
     section.main div[data-testid="stVerticalBlockBorderWrapper"] > div { transition: none !important; }
   }

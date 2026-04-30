@@ -58,32 +58,32 @@ def main():
     movie = None
     is_tmdb_only = False
 
-    if movie_id:
-        try:
-            movie = api_get_movie(int(movie_id))
-        except ApiError as exc:
-            st.error(str(exc))
-            if st.button("กลับหน้าแรก" if lang == "th" else "Back to home"):
-                st.switch_page("app.py")
-            return
-    elif tmdb_id:
-        try:
-            details = fetch_movie_details_by_id_from_tmdb(int(tmdb_id), lang=lang)
-            if isinstance(details, dict):
-                # จำลองโครงสร้างให้เหมือน movie object จาก backend
-                movie = {
-                    "id": None, # ยังไม่มีใน DB
-                    "tmdb_id": int(tmdb_id),
-                    "title": details.get("title") or "",
-                    "title_th": details.get("title") if lang == "th" else "",
-                    "genres": "|".join(details.get("genres", [])),
-                    "description": details.get("overview") or "",
-                    "description_th": details.get("overview") if lang == "th" else "",
-                    "poster_url": details.get("poster_url") or "",
-                }
-                is_tmdb_only = True
-        except Exception:
-            movie = None
+    with st.spinner("กำลังโหลดข้อมูล..." if lang == "th" else "Loading..."):
+        if movie_id:
+            try:
+                movie = api_get_movie(int(movie_id))
+            except ApiError as exc:
+                st.error(str(exc))
+                if st.button("กลับหน้าแรก" if lang == "th" else "Back to home"):
+                    st.switch_page("app.py")
+                return
+        elif tmdb_id:
+            try:
+                details = fetch_movie_details_by_id_from_tmdb(int(tmdb_id), lang=lang)
+                if isinstance(details, dict):
+                    movie = {
+                        "id": None,
+                        "tmdb_id": int(tmdb_id),
+                        "title": details.get("title") or "",
+                        "title_th": details.get("title") if lang == "th" else "",
+                        "genres": "|".join(details.get("genres", [])),
+                        "description": details.get("overview") or "",
+                        "description_th": details.get("overview") if lang == "th" else "",
+                        "poster_url": details.get("poster_url") or "",
+                    }
+                    is_tmdb_only = True
+            except Exception:
+                movie = None
 
     if not movie:
         st.info("ไม่พบข้อมูลภาพยนตร์" if lang == "th" else "Movie not found")
